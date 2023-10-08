@@ -1,32 +1,44 @@
 /* JNI01-J. Safely invoke standard APIs that perform tasks using the immediate caller's class loader instance (loadLibrary) */
+/* Corrected Code */
 
 // Trusted.java
- 
 import java.security.*;
  
 public class Trusted {
  
-   public static void loadLibrary(final String library){
-      AccessController.doPrivileged(new PrivilegedAction<Void>() {
-         public Void run() {
-             System.loadLibrary(library);
-             return null;
-         }
-      });
+   // load native libraries
+   static{
+      System.loadLibrary("NativeMethodLib1");
+      System.loadLibrary("NativeMethodLib2");
+      ...
    }
-}
  
----------------------------------------------------------------------------------
+   // private native methods
+   private native void nativeOperation1(byte[] data, int offset, int len);
+   private native void nativeOperation2(...)
+   ...
+  
+   // wrapper methods perform SecurityManager and input validation checks
+   public void doOperation1(byte[] data, int offset, int len) {
+      // permission needed to invoke native method
+      securityManagerCheck();
  
-// Untrusted.java
+      if (data == null) {
+         throw new NullPointerException();
+      }
  
-public class Untrusted {
+      // copy mutable input
+      data = data.clone();
  
-   private native void nativeOperation();
+      // validate input
+      if ((offset < 0) || (len < 0) || (offset > (data.length - len))) {
+         throw new IllegalArgumentException();
+      }
  
-   public static void main(String[] args) {
-      String library = new String("NativeMethodLib");
-      Trusted.loadLibrary(library);
-      new Untrusted.nativeOperation();  // invoke the native method
+      nativeOperation1(data, offset, len);
+   }
+    
+   public void doOperation2(...){
+      ...
    }
 }
