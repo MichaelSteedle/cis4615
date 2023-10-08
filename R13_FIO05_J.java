@@ -1,4 +1,5 @@
 /* FIO05-J. Do not expose buffers or their backing arrays methods to untrusted code */
+/* Corrected Code */
 
 final class Wrap {
   private char[] dataArray;
@@ -9,6 +10,6 @@ final class Wrap {
   }
  
   public CharBuffer getBufferCopy() {
-    return CharBuffer.wrap(dataArray);
+    return CharBuffer.wrap(dataArray).asReadOnlyBuffer();
   }
 }
